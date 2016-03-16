@@ -29,6 +29,8 @@ function upei_roblib_scholar_customizations_add_xacml($object){
   // start with a fresh policy (empty)
   $xacml = new IslandoraXacml($object, "");
   $xml = new DOMDocument();
+  // TODO should we compare u1 field in MODS/MADS with existing in XACML and only update if they are different?
+  // If we find we are editing the MODS or MADS often we may want to consider the above.
   if (!empty($object['MODS'])) {
     $test = $xml->loadXML($object['MODS']->getContent(''));
     if (!empty($test)) {
