@@ -1,0 +1,6 @@
+name = UPEI Roblib scholar customizations
+description = Implements some islandora scholar customizations for upeis robertson library
+package = Roblib
+dependencies[] = islandora_scholar
+version = 7.x-dev
+core = 7.x
