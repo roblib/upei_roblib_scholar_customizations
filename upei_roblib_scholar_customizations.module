@@ -14,6 +14,16 @@ function upei_roblib_scholar_customizations_islandora_object_ingested($object) {
 }
 
 /**
+ * Implements hook_islandora_datastream_ingested
+ */
+function upei_roblib_scholar_customizations_islandora_datastream_ingested($object, $datastream){
+  if($datastream->id === 'PDF') {
+    module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/utilities');
+    upei_roblib_scholar_customizations_update_pdf_label($object);
+  }
+}
+
+/**
  * Implements hook_islandora_datastream_modified
  */
 function upei_roblib_scholar_customizations_islandora_datastream_modified
