@@ -45,7 +45,7 @@ function upei_roblib_scholar_customizations_add_xacml($object){
     }
   }
   if (!empty($object['MADS'])) {
-    $test = $xml->loadXML($object['MODS']->getContent(''));
+    $test = $xml->loadXML($object['MADS']->getContent(''));
     if (!empty($test)) {
       $query = "//mads:identifier[@type='u1']";
       $xpath = new DOMXPath($xml);
