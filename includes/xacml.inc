@@ -26,8 +26,13 @@ function upei_roblib_scholar_customizations_add_xacml($object){
   if (count(array_intersect($object->models,$cmodels)) < 1) {
     return;
   }
-  // start with a fresh policy (empty)
-  $xacml = new IslandoraXacml($object, "");
+
+  $xacml = new IslandoraXacml($object, NULL);
+  // clear management rule but leave viewing rules in case this object is embargoed.
+  // there is a chance we could end up with user that can manage but can't view but
+  // we don't have very many embargoed objects and they don't get updated often so the
+  // risk is low and fixing manually is straight forward.
+  $xacml->managementRule->clear();
   $xml = new DOMDocument();
   // TODO should we compare u1 field in MODS/MADS with existing in XACML and only update if they are different?
   // If we find we are editing the MODS or MADS often we may want to consider the above.
