@@ -48,19 +48,7 @@ function  upei_roblib_scholar_customizations_islandora_object_modified(AbstractO
 }
 
 /**
- * Implements hook_form_alter.
- *
- * We add our own validate function if this is a formbuilder form.
- */
-function upei_roblib_scholar_customizations_form_alter(&$form, &$form_state, $form_id) {
-  if($form_id !== 'xml_form_builder_datastream_form'){
-    return;
-  }
-  $form['#validate'][] = 'upei_roblib_scholar_customizations_fb_validate';
-}
-
-/**
- * If this is a formbuilder form and the datastream is MODS or MADS we do some extra validation
+ * Validation for elements on various citation, thesis and scholar forms.  We use this one function for many forms.
  *
  * We want to make sure Department fields populated via a type ahead driven by solr actually match the solr values.
  *
@@ -70,52 +58,49 @@ function upei_roblib_scholar_customizations_form_alter(&$form, &$form_state, $fo
  * @param $form
  * @param $form_state
  */
-function upei_roblib_scholar_customizations_fb_validate($form, $form_state){
-  $datastream = empty($form_state['datastream']) ? NULL : $form_state['datastream'];
+function upei_roblib_scholar_customizations_fb_validate($form, $form_state) {
   $form_values = $form_state['values'];
-  if(!empty($datastream) && ($datastream->id === 'MODS' || $datastream->id ==='MADS')){
-    // $field_name also used below in form_set_error if we have an error.
-    $field_name = 'u2_identifier_tabs';
-    $departments = empty($form_values[$field_name]) ? NULL : $form_values[$field_name];
 
-    if(empty($departments)) {
-      $departments = empty($form_values['affiliation']['organization_tabs']) ? NULL : $form_values['affiliation']['organization_tabs'];
-      $field_name = 'affiliation';
-    }
-    if(empty($departments)) {
-      $field_name = 'u2_identifier_tab';
-      $departments = empty($form_values[$field_name]) ? NULL : $form_values[$field_name];
-    }
-    if(empty($departments)) {
-      $field_name = 'u2-identifier-tabs';
-      $departments = empty($form_values[$field_name]) ? array() : $form_values[$field_name];
-    }
-    // Instead of using variable_get('islandora_entities_department_solr_field', 'MADS_department_mt');
-    // We hardcoded to the string version as we want our comparisions to be case sensitive.
-    $department_field = 'MADS_department_ms';
-    $cmodel = 'islandora\:organizationCModel';
-    $url = parse_url(variable_get('islandora_solr_url', 'localhost:8080/solr'));
-    $solr = new Apache_Solr_Service($url['host'], $url['port'], $url['path'] . '/');
-    $solr->setCreateDocuments(FALSE);
-    $params = array(
-      'fl' => array('PID'),
-    );
-    foreach($departments as $dept){
-      unset($dept['add-tabpanel']);
-      unset($dept['delete-tabpanel']);
-      foreach($dept as $value) {
-        if (!empty($value)) {
-          $query = "$department_field:\"$value\" AND RELS_EXT_hasModel_uri_mt:$cmodel";
-          try {
-            $results = $solr->search($query, 0, 1000, $params);
-            $json = json_decode($results->getRawResponse(), TRUE);
-            if ($json['response']['numFound'] != '1') {
-              form_set_error($field_name, "value $value is not a valid department");
-            }
+  $field_name = 'u2_identifier_tabs';
+  $departments = empty($form_values[$field_name]) ? NULL : $form_values[$field_name];
+
+  if (empty($departments)) {
+    $departments = empty($form_values['affiliation']['organization_tabs']) ? NULL : $form_values['affiliation']['organization_tabs'];
+    $field_name = 'affiliation';
+  }
+  if (empty($departments)) {
+    $field_name = 'u2_identifier_tab';
+    $departments = empty($form_values[$field_name]) ? NULL : $form_values[$field_name];
+  }
+  if (empty($departments)) {
+    $field_name = 'u2-identifier-tabs';
+    $departments = empty($form_values[$field_name]) ? array() : $form_values[$field_name];
+  }
+  // Instead of using variable_get('islandora_entities_department_solr_field', 'MADS_department_mt');
+  // We hardcoded to the string version as we want our comparisions to be case sensitive.
+  $department_field = 'MADS_department_ms';
+  $cmodel = 'islandora\:organizationCModel';
+  $url = parse_url(variable_get('islandora_solr_url', 'localhost:8080/solr'));
+  $solr = new Apache_Solr_Service($url['host'], $url['port'], $url['path'] . '/');
+  $solr->setCreateDocuments(FALSE);
+  $params = array(
+    'fl' => array('PID'),
+  );
+  foreach ($departments as $dept) {
+    unset($dept['add-tabpanel']);
+    unset($dept['delete-tabpanel']);
+    foreach ($dept as $value) {
+      if (!empty($value)) {
+        $query = "$department_field:\"$value\" AND RELS_EXT_hasModel_uri_mt:$cmodel";
+        try {
+          $results = $solr->search($query, 0, 1000, $params);
+          $json = json_decode($results->getRawResponse(), TRUE);
+          if ($json['response']['numFound'] != '1') {
+            form_set_error($field_name, "value $value is not a valid department");
           }
-          catch (Exception $e) {
-            watchdog_exception('Roblib Scholar Customizations', $e, 'Got an exception while trying to validate department input.', array(), WATCHDOG_ERROR);
-          }
+        }
+        catch (Exception $e) {
+          watchdog_exception('Roblib Scholar Customizations', $e, 'Got an exception while trying to validate department input.', array(), WATCHDOG_ERROR);
         }
       }
     }
