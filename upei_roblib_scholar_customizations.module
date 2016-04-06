@@ -10,7 +10,10 @@
  */
 function upei_roblib_scholar_customizations_islandora_object_ingested($object) {
   module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/xacml');
+  module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/romeo');
   upei_roblib_scholar_customizations_add_xacml($object);
+  _upei_roblib_scholar_customizations_add_romeo($object);
+
 }
 
 /**
@@ -28,8 +31,8 @@ function upei_roblib_scholar_customizations_islandora_datastream_ingested($objec
  */
 function upei_roblib_scholar_customizations_islandora_datastream_modified
 (AbstractObject $object, AbstractDatastream $datastream) {
-  module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/xacml');
   if ($datastream->id === 'MODS' || $datastream->id === 'MADS') {
+    module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/xacml');
     upei_roblib_scholar_customizations_add_xacml($object);
   }
 }
@@ -39,7 +42,7 @@ function upei_roblib_scholar_customizations_islandora_datastream_modified
  */
 function  upei_roblib_scholar_customizations_islandora_object_modified(AbstractObject $object) {
   module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/xacml');
-  // seem to need to get a fresh copy of the object here (we were getting the old owner id before the changes).
+  // seem to need to get a fresh copy of the object here (we were getting the old owner id if we don't work on a reloaded object).
   $object = new IslandoraFedoraObject($object->id, $object->repository);
   upei_roblib_scholar_customizations_add_xacml($object);
 }
