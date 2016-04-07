@@ -6,14 +6,64 @@
  */
 
 /**
+ * Implements hook_menu().
+ */
+function upei_roblib_scholar_customizations_menu() {
+  return array(
+    'islandora/object/%islandora_object/manage/overview/roblib_romeo' => array(
+      'title' => 'Add or Update the ROMEO datastream',
+      'page callback' => '_upei_roblib_scholar_customizations_add_romeo',
+      'page arguments' => array(2),
+      'type' => MENU_LOCAL_ACTION,
+      'file' => 'includes/romeo.inc',
+      'access callback' => 'upei_roblib_scholar_customizations_romeo_access',
+      'access arguments' => array(2),
+    ),
+  );
+}
+
+/**
+ * If this is a citationCModel object and has an issn show the update romeo link.
+ *
+ * @param \AbstractObject $object
+ * @return bool
+ */
+function upei_roblib_scholar_customizations_romeo_access(AbstractObject $object) {
+  $models = $object->models;
+  if (!in_array('ir:citationCModel', $models)) {
+    return FALSE;
+  }
+  if (empty($object['MODS'])) {
+    // we can't get an issn from the mods
+   return FALSE;
+  }
+  $mods_doc = @DOMDocument::loadXML($object['MODS']->content);
+  if (empty($mods_doc)) {
+    // couldn't parse the mods
+    return FALSE;
+  }
+  $mods_xpath = new DOMXPath($mods_doc);
+  $mods_xpath->registerNamespace('mods', 'http://www.loc.gov/mods/v3');
+  $xpath_results = $mods_xpath->query('//mods:identifier[@type="issn" and normalize-space(text())]');
+  if ($xpath_results->length > 0) {
+    // take the first issn
+    $issn = $xpath_results->item(0)->textContent;
+  }
+  if(empty($issn)){
+   return FALSE;
+  }
+  return TRUE;
+}
+
+
+/**
  * Implements hook_islandora_object_ingested
  */
 function upei_roblib_scholar_customizations_islandora_object_ingested($object) {
   module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/xacml');
   module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/romeo');
   upei_roblib_scholar_customizations_add_xacml($object);
-  _upei_roblib_scholar_customizations_add_romeo($object);
-
+  _upei_roblib_scholar_customizations_add_romeo($object, FALSE);
 }
 
 /**

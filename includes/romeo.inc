@@ -10,7 +10,7 @@
  * @param AbstractObject $object
  *   An islandora object
  */
-function _upei_roblib_scholar_customizations_add_romeo($object) {
+function _upei_roblib_scholar_customizations_add_romeo($object, $redirect = TRUE) {
   // we only want to update objects with a citaton cmodel
   $cmodels = array(
     'ir:citationCModel',
@@ -25,15 +25,25 @@ function _upei_roblib_scholar_customizations_add_romeo($object) {
           '%pid' => $object->id,
           '%error' => $e->getMessage()
         ), WATCHDOG_INFO);
+      drupal_set_message(t('Could not add/modify romeo data for object %pid, %error ',
+        array('%pid' => $object->id, '%error' => $e->getMessage())), 'warning', FALSE);
+      if($redirect) {
+        drupal_goto("/islandora/object/$object->id");
+      }
     }
     if ($result === 0) {
-      drupal_set_message(t('Successfully added/updated the ROMEO datastream to object %pid',
-        array('%pid' => $object->id)), 'info', FALSE);
+      drupal_set_message(t('Successfully added/updated the ROMEO datastream for object %pid',
+        array('%pid' => $object->id)), 'status', FALSE);
     }
     elseif ($result < 0) {
       watchdog('upei_roblib_scholar_customizations', 'No Romeo record found for the object %pid',
         array('%pid' => $object->id), WATCHDOG_INFO);
+      drupal_set_message(t('No Romeo record found for the object %pid',
+        array('%pid' => $object->id)), 'warning', FALSE);
     }
+  }
+  if($redirect) {
+    drupal_goto("/islandora/object/$object->id");
   }
 }
 
