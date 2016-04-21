@@ -14,7 +14,7 @@
  * @param AbstractObject $object
  *   An Islandora object
  */
-function upei_roblib_scholar_customizations_add_xacml($object){
+function upei_roblib_scholar_customizations_add_xacml($object) {
   module_load_include('inc', 'islandora_xacml_api', 'includes/xacml');
   $cmodels = array(
     'ir:thesisCModel',
@@ -23,7 +23,7 @@ function upei_roblib_scholar_customizations_add_xacml($object){
     'islandora:eventCModel',
     'islandora:organizationCModel',
   );
-  if (count(array_intersect($object->models,$cmodels)) < 1) {
+  if (count(array_intersect($object->models, $cmodels)) < 1) {
     return;
   }
 

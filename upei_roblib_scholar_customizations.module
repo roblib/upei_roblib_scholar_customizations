@@ -19,6 +19,14 @@ function upei_roblib_scholar_customizations_menu() {
       'access callback' => 'upei_roblib_scholar_customizations_romeo_access',
       'access arguments' => array(2),
     ),
+    'upei/roblib/autocomplete/%' => array(
+      'title' => 'u1 callback',
+      'page callback' => 'upei_roblib_scholar_customizations_u1_callback',
+      'page arguments' => array(3),
+      'type' => MENU_CALLBACK,
+      'file' => 'includes/utilities.inc',
+      'access arguments' => array('search islandora solr'),
+    )
   );
 }
 
@@ -35,7 +43,7 @@ function upei_roblib_scholar_customizations_romeo_access(AbstractObject $object)
   }
   if (empty($object['MODS'])) {
     // we can't get an issn from the mods
-   return FALSE;
+    return FALSE;
   }
   $mods_doc = @DOMDocument::loadXML($object['MODS']->content);
   if (empty($mods_doc)) {
@@ -49,8 +57,8 @@ function upei_roblib_scholar_customizations_romeo_access(AbstractObject $object)
     // take the first issn
     $issn = $xpath_results->item(0)->textContent;
   }
-  if(empty($issn)){
-   return FALSE;
+  if (empty($issn)) {
+    return FALSE;
   }
   return TRUE;
 }
@@ -90,7 +98,7 @@ function upei_roblib_scholar_customizations_islandora_datastream_modified
 /**
  * Implements hook_islandora_object_modified
  */
-function  upei_roblib_scholar_customizations_islandora_object_modified(AbstractObject $object) {
+function upei_roblib_scholar_customizations_islandora_object_modified(AbstractObject $object) {
   module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/xacml');
   // seem to need to get a fresh copy of the object here (we were getting the old owner id if we don't work on a reloaded object).
   $object = new IslandoraFedoraObject($object->id, $object->repository);
@@ -98,62 +106,42 @@ function  upei_roblib_scholar_customizations_islandora_object_modified(AbstractO
 }
 
 /**
- * Validation for elements on various citation, thesis and scholar forms.  We use this one function for many forms.
- *
- * We want to make sure Department fields populated via a type ahead driven by solr actually match the solr values.
- *
- * By doing this we are hardcoding to expected form elements.
- * If any of the forms are edited this validation may no longer work (depending on what is changed).
- *
+ * Validate Faculty Identifiers
  * @param $form
  * @param $form_state
  */
-function upei_roblib_scholar_customizations_fb_validate($form, $form_state) {
-  $form_values = $form_state['values'];
+function upei_roblib_scholar_customizations_validate_u1($form, $form_state) {
+  module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/utilities');
+  _upei_roblib_scholar_customizations_fb_validate($form, $form_state,
+    'u1_identifier_tabs', 'islandora\:personCModel', SOLR_MADS_FACULTY_IDENTIFIER_STRING);
+}
 
+/**
+ * Validate Department identifiers
+ * @param $form
+ * @param $form_state
+ */
+function upei_roblib_scholar_customizations_validate_u2($form, $form_state) {
+  module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/utilities');
   $field_name = 'u2_identifier_tabs';
-  $departments = empty($form_values[$field_name]) ? NULL : $form_values[$field_name];
-
-  if (empty($departments)) {
-    $departments = empty($form_values['affiliation']['organization_tabs']) ? NULL : $form_values['affiliation']['organization_tabs'];
+  $form_values = $form_state['values'];
+  $form_element = empty($form_values[$field_name]) ? NULL : $form_values[$field_name];
+  $cmodel = 'islandora\:organizationCModel';
+  if (empty($form_element)) {
+    $form_element = empty($form_values['affiliation']['organization_tabs']) ? NULL : $form_values['affiliation']['organization_tabs'];
     $field_name = 'affiliation';
   }
-  if (empty($departments)) {
+  if (empty($form_element)) {
     $field_name = 'u2_identifier_tab';
-    $departments = empty($form_values[$field_name]) ? NULL : $form_values[$field_name];
+    $form_element = empty($form_values[$field_name]) ? NULL : $form_values[$field_name];
   }
-  if (empty($departments)) {
+  if (empty($form_element)) {
     $field_name = 'u2-identifier-tabs';
-    $departments = empty($form_values[$field_name]) ? array() : $form_values[$field_name];
+    $form_element = empty($form_values[$field_name]) ? array() : $form_values[$field_name];
   }
-  // Instead of using variable_get('islandora_entities_department_solr_field', 'MADS_department_mt');
-  // We hardcoded to the string version as we want our comparisions to be case sensitive.
-  $department_field = 'MADS_department_ms';
-  $cmodel = 'islandora\:organizationCModel';
-  $url = parse_url(variable_get('islandora_solr_url', 'localhost:8080/solr'));
-  $solr = new Apache_Solr_Service($url['host'], $url['port'], $url['path'] . '/');
-  $solr->setCreateDocuments(FALSE);
-  $params = array(
-    'fl' => array('PID'),
-  );
-  foreach ($departments as $dept) {
-    unset($dept['add-tabpanel']);
-    unset($dept['delete-tabpanel']);
-    foreach ($dept as $value) {
-      if (!empty($value)) {
-        $query = "$department_field:\"$value\" AND RELS_EXT_hasModel_uri_mt:$cmodel";
-        try {
-          $results = $solr->search($query, 0, 1000, $params);
-          $json = json_decode($results->getRawResponse(), TRUE);
-          if ($json['response']['numFound'] != '1') {
-            form_set_error($field_name, "value $value is not a valid department");
-          }
-        }
-        catch (Exception $e) {
-          watchdog_exception('Roblib Scholar Customizations', $e, 'Got an exception while trying to validate department input.', array(), WATCHDOG_ERROR);
-        }
-      }
-    }
-  }
+
+  _upei_roblib_scholar_customizations_fb_validate($form, $form_state,
+    $field_name, $cmodel, SOLAR_MADS_DEPARTMENT_STRING);
 }
+
 

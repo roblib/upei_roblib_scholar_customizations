@@ -25,9 +25,12 @@ function _upei_roblib_scholar_customizations_add_romeo($object, $redirect = TRUE
           '%pid' => $object->id,
           '%error' => $e->getMessage()
         ), WATCHDOG_INFO);
-      drupal_set_message(t('Could not add/modify romeo data for object %pid, %error ',
-        array('%pid' => $object->id, '%error' => $e->getMessage())), 'warning', FALSE);
-      if($redirect) {
+      drupal_set_message(t('Could not add/modify romeo data for object %pid, %error',
+        array(
+          '%pid' => $object->id,
+          '%error' => $e->getMessage()
+        )), 'warning', FALSE);
+      if ($redirect) {
         drupal_goto("/islandora/object/$object->id");
       }
     }
@@ -42,7 +45,7 @@ function _upei_roblib_scholar_customizations_add_romeo($object, $redirect = TRUE
         array('%pid' => $object->id)), 'warning', FALSE);
     }
   }
-  if($redirect) {
+  if ($redirect) {
     drupal_goto("/islandora/object/$object->id");
   }
 }
