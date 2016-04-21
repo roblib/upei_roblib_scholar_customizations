@@ -141,7 +141,7 @@ function upei_roblib_scholar_customizations_validate_u2($form, $form_state) {
   }
 
   _upei_roblib_scholar_customizations_fb_validate($form, $form_state,
-    $field_name, $cmodel, SOLAR_MADS_DEPARTMENT_STRING);
+    $field_name, $cmodel, SOLAR_MADS_DEPARTMENT_STRING, $form_element);
 }
 
 

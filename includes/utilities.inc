@@ -67,10 +67,13 @@ function upei_roblib_scholar_customizations_u1_callback() {
  * @param $form_field_name
  * @param $cmodel
  * @param $solr_field
+ * @param null $form_element
  */
-function _upei_roblib_scholar_customizations_fb_validate($form, $form_state, $form_field_name, $cmodel, $solr_field) {
+function _upei_roblib_scholar_customizations_fb_validate($form, $form_state, $form_field_name, $cmodel, $solr_field, $form_element = NULL) {
   $form_values = $form_state['values'];
-  $form_element = empty($form_values[$form_field_name]) ? array() : $form_values[$form_field_name];
+  if(empty($form_element)) {
+    $form_element = empty($form_values[$form_field_name]) ? array() : $form_values[$form_field_name];
+  }
   $type = ($cmodel === 'islandora\:personCModel') ? 'Faculty ID' : 'Department ID';
   $solr = upei_roblib_scholar_customizations_get_solr();
   $params = array(
