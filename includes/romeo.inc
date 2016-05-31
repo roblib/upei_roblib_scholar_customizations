@@ -111,6 +111,7 @@ function upei_roblib_scholar_customizations_add_romeo($object, $key = NULL, $bas
   if ($publisher_results->length > 0) {
     if (isset($object[$dsid]) && $object[$dsid]->controlGroup == 'E') {
       // we can't update a datastream with controlGroup of E with xml so we need to delete it
+      // we will recreate it as managed
       $object->purgeDatastream($dsid);
     }
     if (isset($object[$dsid])) {

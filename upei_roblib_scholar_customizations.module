@@ -80,7 +80,9 @@ function upei_roblib_scholar_customizations_islandora_object_ingested($object) {
 function upei_roblib_scholar_customizations_islandora_datastream_ingested($object, $datastream) {
   if ($datastream->id === 'PDF') {
     module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/utilities');
+    module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/romeo');
     upei_roblib_scholar_customizations_update_pdf_label($object);
+    _upei_roblib_scholar_customizations_add_romeo($object, FALSE);
   }
 }
 
