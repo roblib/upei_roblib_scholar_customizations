@@ -25,6 +25,43 @@ function upei_roblib_scholar_customizations_update_pdf_label($object) {
 }
 
 /**
+ * Returns the value of the MODS or MADS identifier[@type=u1] element.
+ *
+ * @param object $object
+ *   An islandora object
+ * @param string $dsid
+ *   A datastream id either MADS or MODS
+ * @return string
+ *   The value of the identifier[@type=u1]
+ * @throws \Exception
+ *   if the datastream does not exist, is empty, can't be loaded as xml or the identifier does not exist.
+ */
+function upei_roblib_scholar_customizations_get_u1($object, $dsid){
+  if(empty($object[$dsid]->content)) {
+    throw new Exception("No content found for datastream $dsid");
+  }
+  $xml = $object[$dsid]->content;
+  $doc = @DOMDocument::loadXML($xml);
+  if (empty($doc)) {
+    // couldn't parse the mods
+    throw new Exception('Could not parse XML');
+  }
+  $xpath = new DOMXPath($doc);
+  $namespace = ($dsid === 'MADS') ? 'http://www.loc.gov/mads/v2' : 'http://www.loc.gov/mods/v3';
+  $xpath->registerNamespace('ns', $namespace);
+  $results = $xpath->query('//ns:identifier[@type="u1" and normalize-space(text())]');
+  if ($results->length > 0) {
+    // take the first u1 should really only be one
+    $u1 = $results->item(0)->textContent;
+  }
+  if (empty($u1)) {
+    // no issn to use in romeo query
+    throw new Exception("U1 identifier not found in $dsid datastream.");
+  }
+  return $u1;
+}
+
+/**
  * Callback for faculty identifiers autocomplete
  */
 function upei_roblib_scholar_customizations_u1_callback() {
