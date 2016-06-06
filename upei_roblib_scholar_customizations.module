@@ -87,19 +87,20 @@ function upei_roblib_scholar_customizations_islandora_datastream_ingested($objec
 }
 
 /**
- * Implements hook_preprocess().      
- * 
+ * Implements hook_preprocess().
+ *
  * We want to add the mads identifier[@type=u1] value to the variables array when viewing a personCModel object.
  */
 function upei_roblib_scholar_customizations_preprocess_islandora_person(array &$variables) {
   $object = empty($variables['object']) ? NULL : $variables['object'];
-  if(empty($object)) {
+  if (empty($object)) {
     return;
   }
   module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/utilities');
-  try{
+  try {
     $u1 = upei_roblib_scholar_customizations_get_u1($object, 'MADS');
-  } catch (Exception $e) {
+  }
+  catch (Exception $e) {
     watchdog_exception('UPEI Scholar Customizations', $e, 'Error retrieving u1 identifier from MADS datastream.', array(), WATCHDOG_ERROR);
   }
   $variables['u1'] = $u1;
@@ -127,7 +128,35 @@ function upei_roblib_scholar_customizations_islandora_object_modified(AbstractOb
 }
 
 /**
- * Validate Faculty Identifiers
+ * Validate CCV research interests.
+ * @param $form
+ * @param $form_state
+ */
+function upei_roblib_scholar_customizations_validate_ccv_ri($element, $form_state) {
+  /*
+  if we have existing noncorfming data we will have to uncomment the below code so we can remove the bad data in the form.
+  if (empty($form_state['submitted'])) {
+     We are not submitting the form yet (it's possible someone just removed a tag or something and we don't want to validate yet).
+    return;
+  }  */
+  if (empty($element['#value'])) {
+    // we are not checking if this field is required.  if it has a value we validate it
+    // against the taxonomy vocabulary.
+    return;
+  }
+  // hardcoded the fieldname as it is not always included in with the element
+  // for instance when using the tag element type and have multiple tags.
+  $field_name = 'field_ccv_area_of_research';
+  $field = field_info_field($field_name);
+  $allowed = taxonomy_allowed_values($field);
+  if (!in_array($element['#value'], $allowed)) {
+    form_error($element, t('Invalid value %value in the %title tag list.', array('%title' => $element['#title'],
+      '%value' => $element['#value'])));
+  }
+}
+
+/**
+ * Validate Faculty Identifiers.
  * @param $form
  * @param $form_state
  */
@@ -138,7 +167,7 @@ function upei_roblib_scholar_customizations_validate_u1($form, $form_state) {
 }
 
 /**
- * Validate Department identifiers
+ * Validate Department identifiers.
  * @param $form
  * @param $form_state
  */
