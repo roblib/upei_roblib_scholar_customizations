@@ -197,9 +197,8 @@ function upei_roblib_scholar_customizations_validate_u2($form, $form_state) {
 
 function upei_roblib_scholar_customizations_form_islandora_scholar_upload_form_alter(&$form, $form_state, $form_id) {
   $usage = array(
-    'Public Domain' => 'Public Domain',
-    'Contact Publisher' => 'Contact Publisher (I do not hold the copyright)',
     'Contact Author' => 'Contact Author (I hold the copyright and wish to retain all rights)',
+    'Contact Publisher' => 'Contact Publisher (I do not hold the copyright)',
     'CC-BY' => '<a rel="license" title="Creative Commons Attribution" 
    href="http://creativecommons.org/licenses/by/3.0/">
   <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by/3.0/80x15.png" />
@@ -207,6 +206,13 @@ function upei_roblib_scholar_customizations_form_islandora_scholar_upload_form_a
    title="Creative Commons Attribution 3.0 Unported License" 
    href="http://creativecommons.org/licenses/by/3.0/">Creative Commons
    Attribution </a>',
+
+    'CC-BY-SA' => '<a rel="license" title="Creative Commons Attribution-ShareAlike"
+   href="http://creativecommons.org/licenses/by-sa/3.0/">
+  <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/80x15.png" />
+  </a> This work is licensed under a <a rel="license" 
+   title="Creative Commons Attribution-ShareAlike" 
+   href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike License</a>',
 
     'CC-BY-NC' => '<a rel="license" title="Creative Commons Attribution-NonCommercial" 
    href="http://creativecommons.org/licenses/by-nc/3.0/">
@@ -223,6 +229,13 @@ function upei_roblib_scholar_customizations_form_islandora_scholar_upload_form_a
    title="Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License" 
    href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Creative Commons Attribution-NonCommercial-ShareAlike License</a>',
 
+    'CC-BY-ND' => '<a rel="license" title="Creative Commons Attribution-NoDerivatives"
+   href="http://creativecommons.org/licenses/by-nd/3.0/">
+  <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nd/3.0/80x15.png" />
+  </a> This work is licensed under a <a rel="license" 
+   title="Creative Commons Attribution-NoDerivatives" 
+   href="http://creativecommons.org/licenses/by-nd/3.0/">Creative Commons Attribution-NoDerivatives License</a>',
+
     'CC-BY-NC-ND' => '<a rel="license" title="Creative Commons Attribution-NonCommercial-NoDerivatives" 
    href="http://creativecommons.org/licenses/by-nc-nd/3.0/">
   <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-nd/3.0/80x15.png" />
@@ -230,21 +243,23 @@ function upei_roblib_scholar_customizations_form_islandora_scholar_upload_form_a
    title="Creative Commons Attribution-NonCommercial-NoDerivatives 3.0 Unported License" 
    href="http://creativecommons.org/licenses/by-nc-nd/3.0/">Creative Commons Attribution-NonCommercial-NoDerivatives License</a>',
 
-    'CC-BY-SA' => '<a rel="license" title="Creative Commons Attribution-ShareAlike"
-   href="http://creativecommons.org/licenses/by-sa/3.0/">
-  <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/80x15.png" />
-  </a> This work is licensed under a <a rel="license" 
-   title="Creative Commons Attribution-ShareAlike" 
-   href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike License</a>',
-
-    'CC-BY-ND' => '<a rel="license" title="Creative Commons Attribution-NoDerivatives"
-   href="http://creativecommons.org/licenses/by-sa/3.0/">
-  <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nd/3.0/80x15.png" />
+    'CC0' => '<a rel="license" title="Creative Commons - No Rights Reserved"
+   href="https://creativecommons.org/about/cc0/">
+  <img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/p/zero/1.0/80x15.png" />
   </a> This work is licensed under a <a rel="license" 
    title="Creative Commons Attribution-NoDerivatives" 
-   href="http://creativecommons.org/licenses/by-nd/3.0/">Creative Commons Attribution-NoDerivatives License</a>',
+   href="https://creativecommons.org/about/cc0/">Creative Commons - No Rights Reserved</a>',
+
+    'Public Domain' => 'Public Domain',
   );
   $form['upload_document']['usage']['#options'] = $usage;
+  $versions = array(
+    'PRE-PRINT' => 'Pre-print - The version of the document you submitted to the publisher prior to peer-review.',
+    'POST-PRINT' => 'Post-print - The version of the document after it has been peer-reviewed, but before it has gone to typesetting.',
+    'PUBLISHED' => 'Published PDF - The published version of the document.',
+    'OTHER' => 'Other/Unpublished - A document that has not been published or is otherwise considered unpublished.',
+  );
+  $form['upload_document']['version']['#options'] = $versions;
   return $form;
 }
 
