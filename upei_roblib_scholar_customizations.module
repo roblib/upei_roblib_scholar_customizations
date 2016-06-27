@@ -260,7 +260,45 @@ function upei_roblib_scholar_customizations_form_islandora_scholar_upload_form_a
     'OTHER' => 'Other/Unpublished - A document that has not been published or is otherwise considered unpublished.',
   );
   $form['upload_document']['version']['#options'] = $versions;
+  // Call our submit handler not scholars We are using different attributes for usage etc.
+  $form['#submit'] = array('upei_roblib_scholar_customizations_scholar_upload_form_submit');
+
   return $form;
 }
+
+/**
+ * Upload form Submit handler, adds PDF datastream.
+ *
+ * Also updates the MODS usage and version for the PDF datastream.
+ *
+ * We override the scholars version of this function so we can use our own usage and version attributes.
+ *
+ * @param array $form
+ *   The Drupal form definition.
+ * @param array $form_state
+ *   The Drupal form state.
+ */
+function upei_roblib_scholar_customizations_scholar_upload_form_submit(array $form, array &$form_state) {
+  extract($form_state['values']);
+
+  $object = islandora_object_load($pid);
+
+  try {
+    $datastream = $object->constructDatastream($dsid, 'M');
+    $datastream->label = 'PDF Datastream';
+    $datastream->mimetype = 'application/pdf';
+    $file = file_load($file);
+    $path = drupal_realpath($file->uri);
+    $datastream->setContentFromFile($path);
+
+    $object->ingestDatastream($datastream);
+    module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/upload.tab');
+    upei_roblib_scholar_customizations_add_usage_and_version_elements_to_mods($object, $usage, $version);
+  }
+  catch (Exception $e) {
+    drupal_set_message(t('@message', array('@message' => check_plain($e->getMessage()))), 'error');
+  }
+}
+
 
 
