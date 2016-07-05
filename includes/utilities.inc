@@ -62,6 +62,44 @@ function upei_roblib_scholar_customizations_get_u1($object, $dsid){
 }
 
 /**
+ * Returns the value of the MADS affiliation element.
+ *
+ * @param object $object
+ *   An islandora object
+ * @return array
+ *   The value of the mads affiliation fields
+ * @throws \Exception
+ *   if the datastream does not exist, is empty, can't be loaded as xml or the identifier does not exist.
+ */
+function upei_roblib_scholar_customizations_get_u2($object){
+  if(empty($object['MADS']->content)) {
+    throw new Exception("No content found for datastream MADS");
+  }
+  $xml = $object['MADS']->content;
+  $doc = @DOMDocument::loadXML($xml);
+  if (empty($doc)) {
+    // couldn't parse the mods
+    throw new Exception('Could not parse MADS XML');
+  }
+  $xpath = new DOMXPath($doc);
+  $namespace = 'http://www.loc.gov/mads/v2';
+  $xpath->registerNamespace('ns', $namespace);
+  $results = $xpath->query('//ns:affiliation/ns:organization');
+  $u2 = array();
+  if ($results->length > 0) {
+    // take the first u1 should really only be one
+    foreach($results as $result){
+       array_push($u2, $result->textContent);
+    }
+  }
+  if (empty($u2)) {
+    // no issn to use in romeo query
+    throw new Exception("Affiliation not found in MADS datastream.");
+  }
+  return $u2;
+}
+
+/**
  * Callback for faculty identifiers autocomplete
  */
 function upei_roblib_scholar_customizations_u1_callback() {
