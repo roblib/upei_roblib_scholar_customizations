@@ -107,6 +107,30 @@ function upei_roblib_scholar_customizations_preprocess_islandora_person(array &$
   }
   $variables['u1'] = $u1;
   $variables['u2'] = $u2;
+  // remove research classifications from research interests
+  if ($object['MADS']) {
+    $mads = $object['MADS']->content;
+    $simplexml = simplexml_load_string($mads);
+
+    $activities = $simplexml->fieldOfActivity;
+    foreach ($activities as $activity) {
+      $ccv = isset($activity['authority']) ? reset($activity['authority']) : ' ';
+      if ($ccv !== 'ccv_aor') {
+        if ((string) $activity) {
+          $fields_of_activity[] = (string) $activity;
+        }
+      }
+    }
+    if (isset($fields_of_activity)) {
+      $list_variables = [
+        'items' => $fields_of_activity,
+        'title' => t('Research Interests'),
+        'type' => 'ul',
+        'attributes' => ['class' => 'research_interests'],
+      ];
+      $variables['activities'] = theme_item_list($list_variables);
+    }
+  }
 }
 
 /**
@@ -302,6 +326,5 @@ function upei_roblib_scholar_customizations_scholar_upload_form_submit(array $fo
     drupal_set_message(t('@message', array('@message' => check_plain($e->getMessage()))), 'error');
   }
 }
-
 
 
