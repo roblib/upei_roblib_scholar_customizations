@@ -83,7 +83,8 @@ function upei_roblib_scholar_customizations_add_usage_and_version_elements_to_mo
     $lac_identifier_element->setAttribute('type', 'lac');
     $lac_id = substr($object->id, strpos($object->id, ':') +1);
     $lac_identifier_element->nodeValue = 'TC-PCU-' . $lac_id;
-    $mods_element->appendChild($lac_identifier_element);     
+    $mods_element->appendChild($lac_identifier_element); 
+    drupal_set_message(t('Auto generated LAC identifier and URL.'));    
    }
   
 // Commit changes to datastream.
