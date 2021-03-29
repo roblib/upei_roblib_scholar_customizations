@@ -98,6 +98,7 @@ function upei_roblib_scholar_customizations_preprocess_islandora_person(array &$
     return;
   }
   module_load_include('inc', 'upei_roblib_scholar_customizations', 'includes/utilities');
+  module_load_include('inc', 'islandora_solr_search', 'includes/utilities');
   try {
     $u1 = upei_roblib_scholar_customizations_get_u1($object, 'MADS');
     $u2 = upei_roblib_scholar_customizations_get_u2($object);
@@ -117,7 +118,8 @@ function upei_roblib_scholar_customizations_preprocess_islandora_person(array &$
       $ccv = isset($activity['authority']) ? reset($activity['authority']) : ' ';
       if ($ccv !== 'ccv_aor') {
         if ((string) $activity) {
-          $fields_of_activity[] = (string) $activity;
+          $fields_of_activity[] = l((string) $activity,
+            '/islandora/search/MADS_fieldOfActivity_mt%3A(' . islandora_solr_lesser_escape((string) $activity) .' )');
         }
       }
     }
